@@ -1,14 +1,32 @@
 # Dynamic View
 
 ## Overview
-Dynamic View is a World of Warcraft addon created by Erloys that automatically changes the camera view when entering or leaving combat. This addon provides players with the convenience of having different camera perspectives tailored for combat and non-combat situations.
-I personally use it with the [ShaguController](https://shagu.org/ShaguController) Addon. for my controller ui.
+Dynamic View is a World of Warcraft addon created by Erloys that automatically changes the camera view when entering or leaving combat. This addon provides players with the convenience of having different camera perspectives tailored for combat and non-combat situations. It's particularly useful when paired with the [ShaguController](https://shagu.org/ShaguController) Addon for a controller UI.
 
 ## Features
-- Automatically switches between two pre-defined camera views:
-  - Normal View: Default camera perspective for non-combat situations.
-  - Combat View: Camera perspective optimized for combat scenarios.
-- Ability to customize camera views by editing the Lua file.
+- Automatically switches between different camera views based on triggers:
+
+### Normal View
+- **Enter Condition**: N/A (Default view)
+- **Exit Condition**: N/A
+- **Exit View**: N/A
+
+### Combat View
+- **Enter Condition**: Entering combat.
+- **Exit Condition**: Leaving combat.
+- **Exit View**: Normal view (unless Normal trigger is disabled), unless indoors, then it switches to Indoor view (unless Indoor trigger is disabled).
+
+### Indoor View
+- **Enter Condition**: Entering an indoor area.
+- **Exit Condition**: Leaving the indoor area.
+- **Exit View**: Normal view (unless Normal trigger is disabled).
+
+### Melee View
+- **Enter Condition**: Performing a melee attack.
+- **Exit Condition**: Ceasing melee attacks.
+- **Exit View**: Combat view (unless Combat trigger is disabled).
+
+- Ability to enable/disable specific triggers.
 - Persistent saved view settings between gaming sessions.
 - Optional logging functionality for debugging purposes.
 
@@ -17,10 +35,12 @@ I personally use it with the [ShaguController](https://shagu.org/ShaguController
 2. Restart World of Warcraft if it was running during the installation process.
 
 ## Usage
-Once installed, Dynamic View will automatically manage your camera perspective based on your combat status. There are no additional configuration options in the game interface. However, you can customize the camera views by editing the `DynView.lua` file located in the addon's folder.
+By default, the addon disables all triggers. For each new character, you'll need to activate the desired triggers one by one.
 
-To save a specific camera view, you can bind a key to the `setview (number)` keybind in the game's key bindings menu. The saved view will persist between gaming sessions.
+For example, to activate the combat trigger:
+- `/dynview enable combat`
 
-## Configuration
-You can customize the camera views by editing the `DynView.lua` file:
-- Adjust the `NormalView` and `CombatView` variables to set the desired camera view IDs.
+To configure a point of view for a trigger, simply position the camera in the desired viewpoint and then use the command:
+- `/dynview <view>`
+
+
