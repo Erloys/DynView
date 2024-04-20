@@ -26,10 +26,6 @@ Dynamic View is a World of Warcraft addon created by Erloys that automatically c
 - **Exit Condition**: Ceasing melee attacks.
 - **Exit View**: Combat view (unless Combat trigger is disabled).
 
-- Ability to enable/disable specific triggers.
-- Persistent saved view settings between gaming sessions.
-- Optional logging functionality for debugging purposes.
-
 ## Installation
 1. Extract the contents of the downloaded ZIP file into your World of Warcraft `Interface\AddOns` directory.
 2. Restart World of Warcraft if it was running during the installation process.
@@ -41,6 +37,6 @@ For example, to activate the combat trigger:
 - `/dynview enable combat`
 
 To configure a point of view for a trigger, simply position the camera in the desired viewpoint and then use the command:
-- `/dynview set <view>`
+- `/dynview set combat`
 
 
