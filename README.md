@@ -39,4 +39,6 @@ For example, to activate the combat trigger:
 To configure a point of view for a trigger, simply position the camera in the desired viewpoint and then use the command:
 - `/dynview set combat`
 
+type `/dynview help` ingame for more commands.
+
 
