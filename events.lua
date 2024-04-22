@@ -1,62 +1,68 @@
-local events = {
-    "PLAYER_ENTER_COMBAT", "PLAYER_LEAVE_COMBAT", "PLAYER_REGEN_DISABLED",
+DynView.events = {
+    "PLAYER_ENTER_COMBAT", -- THIS EVENT FOR CHECK IF ENTER IN MELEE
+    "PLAYER_LEAVE_COMBAT",
+    "PLAYER_REGEN_DISABLED", -- THIS EVENT FOR CHECK ENTER IN COMBAT
     "PLAYER_REGEN_ENABLED", "PLAYER_LOGIN", "ZONE_CHANGED",
     "ZONE_CHANGED_INDOORS", "ADDON_LOADED"
 }
 
 DynView.EventFrame = CreateFrame("Frame")
-for _, event in ipairs(events) do DynView.EventFrame:RegisterEvent(event) end
+for _, event in ipairs(DynView.events) do DynView.EventFrame:RegisterEvent(event) end
 
-DynView.eventActions = {
+DynView.EventActions = {
+    -- MELEE
     ["PLAYER_ENTER_COMBAT"] = function()
-        DynView.EnterView(DynView.Views.melee)
+        DynView.EnterView(DynView.NametoView.melee);
     end,
     ["PLAYER_LEAVE_COMBAT"] = function()
-        DynView.EnterView(DynView.Views.combat)
+        DynView.ExitView(DynView.NametoView.combat, DynView.IsInBattle);
     end,
+    -- COMBAT
     ["PLAYER_REGEN_DISABLED"] = function()
-        DynView.IsInBattle = true
-        DynView.EnterView(DynView.Views.combat)
+        DynView.IsInBattle = true;
+        DynView.EnterView(DynView.NametoView.combat);
     end,
     ["PLAYER_REGEN_ENABLED"] = function()
-        DynView.IsInBattle = false
-        DynView.EnterView(DynView.Views.normal)
+        DynView.IsInBattle = false;
+        DynView.EnterDefaultViewByLocation();
     end,
     ["PLAYER_LOGIN"] = function()
-        if DynViewConf.IsIndoor then
-            DynView.EnterView(DynView.Views.indoor);
-            return; 
-        end
-        DynView.EnterView(DynView.Views.normal) end,
-    ["ZONE_CHANGED"] = function()
-        if not DynView.IsInBattle then
-            DynView.EnterView(DynView.Views.normal);
-            DynViewConf.IsIndoor = false;
-        end
+        DynView.EnterDefaultViewByLocation();
     end,
-    ["ZONE_CHANGED_INDOORS"] = function()
-        if not DynView.IsInBattle then
-            DynView.EnterView(DynView.Views.indoor);
-            DynViewConf.IsIndoor = true;
+    -- OUTDOOR
+    ["ZONE_CHANGED"] = function()
+        if DynView.IsInBattle then
+            return;
         end
+        DynView.EnterView(DynView.NametoView.normal);
+        DynViewConf.IsIndoor = false;
+    end,
+    -- INDOOR
+    ["ZONE_CHANGED_INDOORS"] = function()
+        if DynView.IsInBattle then
+            return;
+        end
+        DynView.EnterView(DynView.NametoView.indoor);
+        DynViewConf.IsIndoor = true;
     end,
     ["ADDON_LOADED"] = function()
-        if arg1 == DynView.AddonName then
-            if DynViewState == nil then DynViewState = true; end
-            if DynViewConf == nil then
-                DynViewConf = {};
-                for k, _ in pairs(DynView.Views) do
-                    DynViewConf[k] = false;
-                end
-                DynViewConf.IsIndoor = false;
-            end
+        if arg1 ~= DynView.AddonName then
+            return;
+        end
+        if DynViewConf == nil then
+            DynViewConf = DynView.GetDefaultConf();
         end
     end
 }
 
 DynView.EventFrame:SetScript("OnEvent", function()
-    if (DynViewState ~= nil and not DynViewState) then return; end
+    -- if DynViewConf is nil it mean addon not loaded.
+    --so the event "ADDON_LOADED" can pass the guard condition.
+    if (DynViewConf ~= nil and not DynViewConf.IsAddonEnabled) then
+        DynView.log("skip event " .. event .. " cause addon disabled"); 
+        return;
+    end
     DynView.log("process event: " .. event);
-    local action = DynView.eventActions[event];
+    local action = DynView.EventActions[event];
     if action then action(); end
 end)

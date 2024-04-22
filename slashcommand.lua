@@ -1,7 +1,9 @@
+
 DynView.AvailableView = ""
-for k, _ in pairs(DynView.Views) do
+for k, _ in pairs(DynView.NametoView) do
     DynView.AvailableView = DynView.AvailableView .. k .. ", "
 end
+
 
 DynView.HelpMessage = [[
     
@@ -13,8 +15,10 @@ Commands:
 /dynview enable <view>: Activate a specific view trigger.
 /dynview disable: Deactivate the addon.
 /dynview disable <view>: Deactivate a specific view trigger.
-/set <view>: Set the current point of view for a specified view trigger.
-/reset <view>: Reset to the default point of view for a specified view trigger.
+/dynview set <view>: Set the current point of view for a specified view trigger.
+/dynview set <view>: Set the current point of view for a specified view trigger.
+/dynview reset <view>: Reset to the default point of view for a specified view trigger.
+/dynview state: show the view trigger state.
 
 View Triggers:
 
@@ -36,68 +40,62 @@ Exiting this view switches to Combat view (unless Combat trigger is disabled).
 
 ]]
 
-SLASH_DYNVIEW1 = "/dynview"
-SlashCmdList["DYNVIEW"] = function(command)
-    local _, _, cmd, viewName = string.find(command, "%s?(%w+)%s?(.*)")
-    local view = DynView.Views[viewName]
+local function boolToText(boolean)
+    if boolean then
+        return "enabled";
+    end
+    return "disabled";  
+end
 
-    local actions = {
-        help = function() DynView.notify(DynView.HelpMessage) end,
-        enable = function()
-            if (viewName ~= nil) then
-                if (nil == view) then
-                    notify("Invalid command argument");
-                    return;
-                end
-                DynViewConf[view] = true;
-                DynView.notify("view " .. view .. " trigger is enabled");
-                return;
-            elseif DynView.DynViewState then
-                DynView.notify("already enabled");
-                return;
-            end
-            DynView.DynViewState = true
-            DynView.notify("enabled, type '/dynview disable' to disable it.")
-        end,
-        disable = function()
-            if (viewName ~= nil) then
-                if (nil == view) then
-                    notify("invalid command argument");
-                    return;
-                end
-                DynViewConf[view] = false;
-                DynView.notify("view" .. view .. "trigger is disabled");
-                return;
-            elseif not DynView.DynViewState then
-                DynView.notify("already off");
-                return;
-            end
-            DynView.DynViewState = false
-            DynView.notify("disabled, type '/dynview enable' to enable it.")
-        end,
-        set = function()
-            if view then
-                SaveView(view)
-                DynView.notify(viewName .. " view set.")
-            else
-                DynView.notify("error invalid argument: " .. viewName)
-            end
-        end,
-        reset = function()
-            if view then
-                ResetView(view)
-                DynView.notify(viewName .. " view reset to default.")
-            else
-                DynView.notify("error invalid argument: " .. viewName)
+DynView.CommandActions = {
+    help = function() DynView.notify(DynView.HelpMessage) end,
+    enable = function(viewArg)
+        if (viewArg[1] == "") then
+            DynView.EnableAddon();
+        else
+            DynViewConf[viewArg[1]] = true;
+            DynView.notify("view " .. viewArg[1] .. " trigger is enabled");
+        end
+    end,
+    disable = function(viewArg)
+        if (viewArg[1] == "") then
+            DynView.DisableAddon();
+        else
+            DynViewConf[viewArg[1]] = false;
+            DynView.notify("view " .. viewArg[1] .. " trigger is disabled");
+        end
+    end,
+    set = function(viewArg)
+        SaveView(viewArg[2]);
+        DynView.notify(viewArg[1] .. " view set.");
+    end,
+    reset = function(viewArg)
+        ResetView(viewArg[2]);
+        DynView.notify(viewArg[1] .. " view reset to default.");
+    end,
+    state = function ()
+        local text = "";
+        for k,v in pairs(DynViewConf) do
+            if k ~= "IsEnabled" and k ~= "IsIndoor" then
+                text = text .. "the view: " .. k .. "is " .. boolToText(v) .. "\n";
             end
         end
-    }
+        notify(text);
+    end,
+}
 
-    local action = actions[cmd]
-    if action then
-        action()
-    else
+SLASH_DYNVIEW1 = "/dynview"
+SlashCmdList["DYNVIEW"] = function(command)
+    local _, _, cmd, viewName = string.find(command, "%s?(%w+)%s?(.*)");
+    local viewArg = {viewName, DynView.GetView(viewName)};
+    local action = DynView.CommandActions[cmd];
+    if action == nil then
         DynView.notify(
-            "invalid command, please type /dynview help for show help")
+            "invalid command, please type /dynview help for show help");
+        return;
+    elseif viewArg[1] ~= "" and viewArg[2] == nil then
+        DynView.notify("invalid argument: unkown view" .. viewArg[1]);
+        return;
     end
+    action(viewArg);
 end

@@ -1,9 +1,9 @@
 ## Interface: 11200
 ## Title: |cffa050ffDynamic View|r
 ## Author: Erloys
-## Version: 1.0.1
+## Version: 1.0.2
 ## Notes: Change camera view, when enter or leaving combat.
-##SavedVariablesPerCharacter: DynViewState, DynViewConf
+##SavedVariablesPerCharacter: DynViewConf
 core.lua
 slashcommand.lua
 events.lua
