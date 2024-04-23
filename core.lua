@@ -62,14 +62,20 @@ function DynView.IsEnabled(view)
 end
 
 function DynView.EnterView(view)
+    local IsMouseWasInLookingState = IsMouselooking();
     local viewName = DynView.ViewtoName[view];
     if (not DynView.IsEnabled(viewName)) then
         DynView.log("skip view " .. viewName .. " cause disabled");
         return;
     end
     DynView.log("enter " .. viewName .. " view");
+    MouselookStart(); -- for not disturb camera y rotation
     SetView(view);
+    if not IsMouseWasInLookingState then
+        MouselookStop(); -- it will be instant player wont notice .
+    end
 end
+
 
 
 function DynView.EnterDefaultViewByLocation()
